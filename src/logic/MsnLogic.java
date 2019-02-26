@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -444,7 +446,7 @@ public class MsnLogic {
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	}
 
-	private void doRespond(String respond) {
+	synchronized private void doRespond(String respond) {
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		// Method				:	private void doRespond(String respond)
 		//
@@ -461,6 +463,8 @@ public class MsnLogic {
 		//							Feb 1, 2019		    Mohammed Al-Safwan				Initial setup
 		//
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+		Lock lock = new ReentrantLock();
+		lock.lock();
 		System.out.println("MsnLogic.doResponse()");
 		JSONObject jsonRsponse = new JSONObject(respond);
 		Message msgRsponse = new Message();
@@ -480,13 +484,14 @@ public class MsnLogic {
 				Stream.concat(mMessages.stream(), allNewMsgs.stream()).distinct().collect(Collectors.toSet()));
 
 		Collections.sort(mMessages);
+		lock.unlock();
 
-		int index = 0;
-		for (Message msg : mMessages) {
-			System.out.println("msg#" + index);
-			System.out.println(msg.toPrettyString());
-			index++;
-		}
+//		int index = 0;
+//		for (Message msg : mMessages) {
+//			System.out.println("msg#" + index);
+//			System.out.println(msg.toPrettyString());
+//			index++;
+//		}
 
 	}
 

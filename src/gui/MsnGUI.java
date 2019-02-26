@@ -5,6 +5,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
@@ -174,7 +176,7 @@ public class MsnGUI extends JPanel implements Announcement {
 
 	}
 
-	private void refreshMessageList() {
+	synchronized private void refreshMessageList() {
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		// Method				:	private void refreshMessageList() 
 		//
@@ -191,6 +193,8 @@ public class MsnGUI extends JPanel implements Announcement {
 		//							Jan 15, 2019		    Mohammed Al-Safwan				Initial setup
 		//
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+		Lock lock = new ReentrantLock();
+		lock.lock();
 		Message[] list = mMsnLogic.getMessages().toArray(new Message[0]);
 		DefaultListModel<Message> listModel = new DefaultListModel<>();
 		for (Message msg : list) {
@@ -202,6 +206,7 @@ public class MsnGUI extends JPanel implements Announcement {
 			revalidate();
 			repaint();
 		}
+		lock.unlock();
 	}
 
 	public Component setFrameSize(int height, int width) {
