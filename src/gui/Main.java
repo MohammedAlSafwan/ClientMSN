@@ -191,6 +191,7 @@ public class Main extends JFrame {
 		//							Jan 30, 2019		    Mohammed Al-Safwan				Initial setup
 		//
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+		try {
 		EventQueue.invokeLater(() -> { 												//Call invokeLater() to insure that the application is being run on the dispatch thread
 			try {
 				new Main(); 																	//Initialize the application
@@ -198,6 +199,11 @@ public class Main extends JFrame {
 				e.printStackTrace(); 															//Print out the exception
 			}
 		});
+		}catch(ArrayIndexOutOfBoundsException e) {
+			System.err.println("ArrayIndexOutOfBoundsException: Ladies and Gentlemen, WE GET HIM");
+		}catch(NullPointerException e) {
+			System.err.println("NullPointerException: Ladies and Gentlemen, WE GET HIM");
+		}
 	}
 
 }

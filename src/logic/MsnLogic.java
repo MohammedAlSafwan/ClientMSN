@@ -74,15 +74,12 @@ public class MsnLogic {
 		//
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		sendMessage("", MessageType.GET_ALL_MSGS);
-		mTimer.scheduleAtFixedRate(new TimerTask() {
-			@Override
-			public void run() {
-
-				sendMessage("", MessageType.GET_MSG_AFTER_DATE);
-				if (null != announcer)
-					announcer.updateMsnGUI();
-			}
-		}, 5 * 1000, 1 * 1000);
+//		mTimer.scheduleAtFixedRate(new TimerTask() {
+//			@Override
+//			public void run() {
+//
+//			}
+//		}, 5 * 1000, 1 * 1000);
 		mIsRunning = true;
 	}
 

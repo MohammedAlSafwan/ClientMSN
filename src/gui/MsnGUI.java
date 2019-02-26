@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,6 +15,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import logic.Message;
 import logic.MsnLogic;
@@ -34,6 +36,7 @@ public class MsnGUI extends JPanel implements Announcement {
 	private JTextField mMsgBox;
 	private JList<Message> mMsgsPanel;
 	private JTextField mTxtIpaddress;
+	private SwingWorker<Void, Void> mJobWorker;
 
 	public MsnGUI() {
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -55,6 +58,40 @@ public class MsnGUI extends JPanel implements Announcement {
 		mMsnLogic = MsnLogic.getInstance();
 		mMsnLogic.setAnnouncer(this);
 		mMsnLogic.setSender(JOptionPane.showInputDialog("what is your name?"));
+		mJobWorker = new SwingWorker<Void, Void>() {
+
+			@Override
+			protected Void doInBackground() throws Exception {
+				while (true) {
+					mMsnLogic.sendMessage("", MessageType.GET_MSG_AFTER_DATE);
+					publish();
+					System.err.println("Before wait");
+					Thread.sleep(1000);
+					System.err.println("After wait");
+				}
+			}
+
+			/* (non-Javadoc)
+			 * @see javax.swing.SwingWorker#process(java.util.List)
+			 */
+			@Override
+			protected void process(List<Void> chunks) {
+				// TODO Auto-generated method stub
+				super.process(chunks);
+				updateMsnGUI();
+			}
+
+			/* (non-Javadoc)
+			 * @see javax.swing.SwingWorker#done()
+			 */
+			@Override
+			protected void done() {
+				// TODO Auto-generated method stub
+				super.done();
+
+			}
+
+		};
 		init();
 	}
 
@@ -103,14 +140,14 @@ public class MsnGUI extends JPanel implements Announcement {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					if(!mMsnLogic.isRunning()) {
+					if (!mMsnLogic.isRunning()) {
 						mMsnLogic.setServerAddress(mTxtIpaddress.getText());
-						mMsnLogic.run();
+						runJobThread();
 					}
 					mMsnLogic.sendMessage(mMsgBox.getText(), MessageType.SEND);
 					refreshMessageList();
 					mMsgBox.setText("");
-					
+
 				}
 			}
 
@@ -120,22 +157,21 @@ public class MsnGUI extends JPanel implements Announcement {
 			}
 		});
 		add(mMsgBox);
-		
+
 		mTxtIpaddress = new JTextField();
 		mTxtIpaddress.setText("127.0.0.1");
 		mTxtIpaddress.setBounds(12, 696, 116, 22);
 		mTxtIpaddress.setColumns(10);
 		add(mTxtIpaddress);
 
-		
 		JLabel lblPort = new JLabel(": 6666");
 		lblPort.setBounds(135, 699, 56, 16);
 		add(lblPort);
-		
+
 		JButton btnConnect = new JButton("Connect");
 		btnConnect.setBounds(189, 696, 97, 25);
 		btnConnect.addMouseListener(new MouseListener() {
-			
+
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				//Empty the view from messages
@@ -145,31 +181,27 @@ public class MsnGUI extends JPanel implements Announcement {
 				repaint();
 				//
 				mMsnLogic.setServerAddress(mTxtIpaddress.getText());
-				mMsnLogic.run();
+				runJobThread();
 			}
-			
+
 			@Override
 			public void mousePressed(MouseEvent e) {
 
-				
 			}
-			
+
 			@Override
 			public void mouseExited(MouseEvent e) {
 
-				
 			}
-			
+
 			@Override
 			public void mouseEntered(MouseEvent e) {
 
-				
 			}
-			
+
 			@Override
 			public void mouseClicked(MouseEvent e) {
 
-				
 			}
 		});
 		add(btnConnect);
@@ -195,14 +227,16 @@ public class MsnGUI extends JPanel implements Announcement {
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		Lock lock = new ReentrantLock();
 		lock.lock();
+
 		Message[] list = mMsnLogic.getMessages().toArray(new Message[0]);
 		DefaultListModel<Message> listModel = new DefaultListModel<>();
+
 		for (Message msg : list) {
 			listModel.addElement(msg);
 		}
-		if (null != mMsgsPanel) {																					//in case the timer to get all the messages started before the user getting to the main screen
+		if (null != mMsgsPanel && null != listModel && null != listModel.lastElement()) { //in case the timer to get all the messages started before the user getting to the main screen
 			mMsgsPanel.setModel(listModel);
-			mMsgsPanel.ensureIndexIsVisible(listModel.getSize() - 1);
+			mMsgsPanel.ensureIndexIsVisible(listModel.size() - 1);
 			revalidate();
 			repaint();
 		}
@@ -250,5 +284,12 @@ public class MsnGUI extends JPanel implements Announcement {
 		//
 		// =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 		refreshMessageList();
+	}
+
+	private void runJobThread() {
+		new Thread(() -> {
+			mJobWorker.run();
+		}).start();
+
 	}
 }
