@@ -234,7 +234,7 @@ public class MsnGUI extends JPanel implements Announcement {
 		for (Message msg : list) {
 			listModel.addElement(msg);
 		}
-		if (null != mMsgsPanel && null != listModel && null != listModel.lastElement()) { //in case the timer to get all the messages started before the user getting to the main screen
+		if (null != mMsgsPanel && null != listModel && !listModel.isEmpty()) { //in case the timer to get all the messages started before the user getting to the main screen
 			mMsgsPanel.setModel(listModel);
 			mMsgsPanel.ensureIndexIsVisible(listModel.size() - 1);
 			revalidate();
